@@ -3,6 +3,7 @@ package com.vm.shadowsocks.ui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.GetChars;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,8 +38,12 @@ import com.vm.shadowsocks.core.ProxyConfig;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
+
+import static com.vm.shadowsocks.ui.ParseHtml.DownLoadFromUrl;
+import static com.vm.shadowsocks.ui.ParseHtml.GetServer;
 
 public class MainActivity extends Activity implements
         View.OnClickListener,
@@ -57,6 +63,8 @@ public class MainActivity extends Activity implements
     private ScrollView scrollViewLog;
     private TextView textViewProxyUrl, textViewProxyApp;
     private Calendar mCalendar;
+
+    private List<String> listServer = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +98,9 @@ public class MainActivity extends Activity implements
             ((ViewGroup) findViewById(R.id.AppSelectLayout).getParent()).removeView(findViewById(R.id.AppSelectLayout));
             ((ViewGroup) findViewById(R.id.textViewAppSelectLine).getParent()).removeView(findViewById(R.id.textViewAppSelectLine));
         }
+
+        onLogReceived("Shadowsock start running...");
+
     }
 
     String readProxyUrl() {
@@ -222,21 +233,29 @@ public class MainActivity extends Activity implements
     @SuppressLint("DefaultLocale")
     @Override
     public void onLogReceived(String logString) {
+
         mCalendar.setTimeInMillis(System.currentTimeMillis());
-        logString = String.format("[%1$02d:%2$02d:%3$02d] %4$s\n",
+
+        final String _logString = String.format("[%1$02d:%2$02d:%3$02d] %4$s\n",
                 mCalendar.get(Calendar.HOUR_OF_DAY),
                 mCalendar.get(Calendar.MINUTE),
                 mCalendar.get(Calendar.SECOND),
                 logString);
 
-        System.out.println(logString);
+        System.out.println(_logString);
 
-        if (textViewLog.getLineCount() > 200) {
-            textViewLog.setText("");
-        }
-        textViewLog.append(logString);
-        scrollViewLog.fullScroll(ScrollView.FOCUS_DOWN);
-        GL_HISTORY_LOGS = textViewLog.getText() == null ? "" : textViewLog.getText().toString();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (textViewLog.getLineCount() > 200) {
+                    textViewLog.setText("");
+                }
+                textViewLog.append(_logString);
+                scrollViewLog.fullScroll(ScrollView.FOCUS_DOWN);
+                GL_HISTORY_LOGS = textViewLog.getText() == null ? "" : textViewLog.getText().toString();
+            }
+        });
+
     }
 
     @Override
@@ -302,7 +321,7 @@ public class MainActivity extends Activity implements
         if (scanResult != null) {
             String ProxyUrl = scanResult.getContents();
 
-            if (ProxyUrl.startsWith("ss://")) {
+            if (ProxyUrl != null && ProxyUrl.startsWith("ss://")) {
                 String temp = ProxyUrl.substring(5);
                 if (!temp.contains(":")) {
                     try {
@@ -393,10 +412,132 @@ public class MainActivity extends Activity implements
                 } else {
                     onLogReceived("Proxy global mode is off");
                 }
+            case R.id.menu_item_get_server:
+                ShowGetServerDialog();
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    private void ShowGetServerDialog() {
+        if (listServer.size() == 0) {
+            final ProgressDialog pgd = new ProgressDialog(this);
+
+            final Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    String str = DownLoadFromUrl("https://global.ishadowx.net/");
+
+                    if (str == null) {
+                        onLogReceived("DownLoadFromUrl: return null");
+                    } else {
+                        try {
+                            listServer = GetServer(str);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ShowSelectServer();
+                                }
+                            });
+
+                        } catch (Exception ex) {
+                            onLogReceived(ex.getMessage());
+                        }
+                    }
+
+                    pgd.dismiss();
+                }
+            });
+
+            thread.start();
+
+            pgd.setTitle("Loading from Server...");
+            pgd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            pgd.setButton(DialogInterface.BUTTON_POSITIVE, this.getText(R.string.btn_cancel), new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    try {
+                        thread.stop();
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+            pgd.show();
+
+        } else {
+            ShowSelectServer();
+        }
+    }
+
+    private void ShowSelectServer() {
+
+        String currURL = textViewProxyUrl.getText().toString();
+
+        int _SelectIndex = -1;
+
+        for (int i = 0; i < listServer.size(); i++) {
+            if (listServer.get(i).equals(currURL)) {
+                _SelectIndex = i;
+                break;
+            }
+        }
+
+        final int SelectIndex = _SelectIndex;
+
+        final int[] yourChoice = new int[]{-1};
+
+        String[] strings = new String[listServer.size()];
+
+        listServer.toArray(strings);
+
+        final String[] items = strings;
+
+        AlertDialog.Builder singleChoiceDialog = new AlertDialog.Builder(MainActivity.this);
+
+        singleChoiceDialog.setTitle("Select Items");
+
+        singleChoiceDialog.setSingleChoiceItems(items, SelectIndex,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        yourChoice[0] = which;
+                    }
+                });
+
+        singleChoiceDialog.setPositiveButton(R.string.btn_ok,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (yourChoice[0] == -1) return;
+                        if (yourChoice[0] != SelectIndex) {
+
+                            String ProxyUrl = items[yourChoice[0]];
+
+                            if (isValidUrl(ProxyUrl)) {
+                                setProxyUrl(ProxyUrl);
+                                textViewProxyUrl.setText(ProxyUrl);
+                            } else {
+                                Toast.makeText(MainActivity.this, R.string.err_invalid_url, Toast.LENGTH_SHORT).show();
+                            }
+
+                            textViewProxyUrl.setText(ProxyUrl);
+                        }
+                    }
+                });
+
+        singleChoiceDialog.setNeutralButton("刷新服务器列表", new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                listServer.clear();
+                ShowGetServerDialog();
+            }
+        });
+
+        singleChoiceDialog.show();
+    }
+
 
     @Override
     protected void onResume() {

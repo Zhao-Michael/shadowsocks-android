@@ -3,6 +3,7 @@
     <string name="app_name">Shadowsocks</string>
     <string name="menu_item_switch">代理</string>
     <string name="menu_item_toggle_global">开/关全局模式</string>
+    <string name="menu_item_get_server">获取服务器列表</string>
     <string name="menu_item_about">关于</string>
     <string name="menu_item_exit">退出</string>
     <string name="config_url">配置地址</string>
