@@ -16,17 +16,9 @@ import android.text.GetChars;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CompoundButton;
+import android.view.*;
+import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -64,7 +56,9 @@ public class MainActivity extends Activity implements
     private TextView textViewProxyUrl, textViewProxyApp;
     private Calendar mCalendar;
 
-    private List<String> listServer = new LinkedList<>();
+    private boolean b_ShowException = false;
+
+    private static List<String> listServer = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -244,6 +238,11 @@ public class MainActivity extends Activity implements
 
         System.out.println(_logString);
 
+        if (!b_ShowException && _logString.contains("Connection refused")) {
+            Toast.makeText(this, "Connection refused", Toast.LENGTH_SHORT).show();
+            b_ShowException = true;
+        }
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -296,7 +295,7 @@ public class MainActivity extends Activity implements
             });
             return;
         }
-
+        b_ShowException = false;
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
         onLogReceived("starting...");
@@ -374,7 +373,7 @@ public class MainActivity extends Activity implements
                         .setTitle(getString(R.string.app_name) + " " + getVersionName() + " · Java · IDEA")
                         .setMessage(R.string.about_info)
                         .setPositiveButton(R.string.btn_ok, null)
-                        .setNegativeButton(R.string.btn_more, new OnClickListener() {
+                        .setNeutralButton(R.string.btn_more, new OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/dawei101/shadowsocks-android-java")));
@@ -421,7 +420,7 @@ public class MainActivity extends Activity implements
 
     private void ShowGetServerDialog() {
         if (listServer.size() == 0) {
-            final ProgressDialog pgd = new ProgressDialog(this);
+            final AlertDialog pgd = new AlertDialog.Builder(this).create();
 
             final Thread thread = new Thread(new Runnable() {
                 @Override
@@ -453,8 +452,11 @@ public class MainActivity extends Activity implements
 
             thread.start();
 
-            pgd.setTitle("Loading from Server...");
-            pgd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            pgd.setTitle("Loading Server...");
+
+            ProgressBar progressBar = new ProgressBar(this);
+            progressBar.setPadding(10, 60, 10, 30);
+            pgd.setView(progressBar);
             pgd.setButton(DialogInterface.BUTTON_POSITIVE, this.getText(R.string.btn_cancel), new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -494,9 +496,9 @@ public class MainActivity extends Activity implements
 
         final String[] items = strings;
 
-        AlertDialog.Builder singleChoiceDialog = new AlertDialog.Builder(MainActivity.this);
+        final AlertDialog.Builder singleChoiceDialog = new AlertDialog.Builder(MainActivity.this);
 
-        singleChoiceDialog.setTitle("Select Items");
+        singleChoiceDialog.setTitle("Select Server");
 
         singleChoiceDialog.setSingleChoiceItems(items, SelectIndex,
                 new DialogInterface.OnClickListener() {
@@ -518,6 +520,28 @@ public class MainActivity extends Activity implements
                             if (isValidUrl(ProxyUrl)) {
                                 setProxyUrl(ProxyUrl);
                                 textViewProxyUrl.setText(ProxyUrl);
+
+                                if (!switchProxy.isChecked())
+                                    switchProxy.setChecked(true);
+                                else {
+                                    switchProxy.setChecked(false);
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                Thread.sleep(500);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    switchProxy.setChecked(true);
+                                                }
+                                            });
+                                        }
+                                    }).start();
+                                }
                             } else {
                                 Toast.makeText(MainActivity.this, R.string.err_invalid_url, Toast.LENGTH_SHORT).show();
                             }
@@ -535,7 +559,19 @@ public class MainActivity extends Activity implements
             }
         });
 
-        singleChoiceDialog.show();
+        final AlertDialog dialog = singleChoiceDialog.show();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WindowManager m = getWindowManager();
+                Display d = m.getDefaultDisplay();  //为获取屏幕宽、高
+                android.view.WindowManager.LayoutParams p = dialog.getWindow().getAttributes();  //获取对话框当前的参数值
+                p.height = (int) (d.getHeight() * 0.7);   //高度设置为屏幕的0.3
+                p.width = (int) (d.getWidth());    //宽度设置为屏幕的0.5
+                dialog.getWindow().setAttributes(p);     //设置生效
+            }
+        });
     }
 
 
