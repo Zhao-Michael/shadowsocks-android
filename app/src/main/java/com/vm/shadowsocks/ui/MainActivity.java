@@ -238,8 +238,8 @@ public class MainActivity extends Activity implements
 
         System.out.println(_logString);
 
-        if (!b_ShowException && _logString.contains("Connection refused")) {
-            Toast.makeText(this, "Connection refused", Toast.LENGTH_SHORT).show();
+        if (!b_ShowException && _logString.contains("Exception")) {
+            Toast.makeText(this, _logString, Toast.LENGTH_SHORT).show();
             b_ShowException = true;
         }
 
@@ -578,6 +578,7 @@ public class MainActivity extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
+        b_ShowException = false;
         if (AppProxyManager.isLollipopOrAbove) {
             if (AppProxyManager.Instance.proxyAppInfo.size() != 0) {
                 String tmpString = "";
