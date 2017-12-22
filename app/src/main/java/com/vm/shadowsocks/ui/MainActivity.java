@@ -411,11 +411,14 @@ public class MainActivity extends Activity implements
                 } else {
                     onLogReceived("Proxy global mode is off");
                 }
+                break;
             case R.id.menu_item_get_server:
                 ShowGetServerDialog();
+                break;
             default:
-                return super.onOptionsItemSelected(item);
+                break;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void ShowGetServerDialog() {
