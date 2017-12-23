@@ -93,7 +93,7 @@ public class MainActivity extends Activity implements
             ((ViewGroup) findViewById(R.id.textViewAppSelectLine).getParent()).removeView(findViewById(R.id.textViewAppSelectLine));
         }
 
-        onLogReceived("Shadowsock start running...");
+        onLogReceived("Shadowsock App Start...");
 
     }
 
@@ -155,7 +155,8 @@ public class MainActivity extends Activity implements
                     .setTitle(R.string.config_url)
                     .setItems(new CharSequence[]{
                             getString(R.string.config_url_scan),
-                            getString(R.string.config_url_manual)
+                            getString(R.string.config_url_manual),
+                            getString(R.string.menu_item_get_server)
                     }, new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -166,6 +167,10 @@ public class MainActivity extends Activity implements
                                 case 1:
                                     showProxyUrlInputDialog();
                                     break;
+                                case 2:{
+                                    ShowGetServerDialog();
+                                    break;
+                                }
                             }
                         }
                     })
@@ -268,7 +273,8 @@ public class MainActivity extends Activity implements
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (LocalVpnService.IsRunning != isChecked) {
-            switchProxy.setEnabled(false);
+           if(!switchProxy.getText().toString().contains(getString(R.string.config_not_set_value)))
+               switchProxy.setEnabled(false);
             if (isChecked) {
                 Intent intent = LocalVpnService.prepare(this);
                 if (intent == null) {
@@ -373,12 +379,6 @@ public class MainActivity extends Activity implements
                         .setTitle(getString(R.string.app_name) + " " + getVersionName() + " · Java · IDEA")
                         .setMessage(R.string.about_info)
                         .setPositiveButton(R.string.btn_ok, null)
-                        .setNeutralButton(R.string.btn_more, new OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/dawei101/shadowsocks-android-java")));
-                            }
-                        })
                         .show();
                 return true;
             case R.id.menu_item_exit:

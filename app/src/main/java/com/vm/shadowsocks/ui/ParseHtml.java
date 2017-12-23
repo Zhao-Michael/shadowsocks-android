@@ -27,7 +27,6 @@ public class ParseHtml {
 
             StringBuilder sb = new StringBuilder();
 
-            // 1K的数据缓冲
             byte[] bs = new byte[100];
 
             int len = 0;
@@ -126,6 +125,7 @@ public class ParseHtml {
             }
         }
 
+
         List<String> result = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
@@ -134,7 +134,19 @@ public class ParseHtml {
             }
         }
 
+        removeDuplicate(result);
+
         return result;
+    }
+
+    public static void removeDuplicate(List list) {
+        for (int i = 0; i < list.size() - 1; i++) {
+            for (int j = list.size() - 1; j > i; j--) {
+                if (list.get(j).equals(list.get(i))) {
+                    list.remove(j);
+                }
+            }
+        }
     }
 
     public static class Server {

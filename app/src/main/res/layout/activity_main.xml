@@ -6,7 +6,7 @@
 
     <LinearLayout
             android:id="@+id/ProxyUrlLayout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:tag="ProxyUrl"
@@ -21,7 +21,7 @@
 
         <TextView
                 android:id="@+id/textViewProxyUrl"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/config_not_set_value"
                 android:textAppearance="?android:attr/textAppearanceSmall"/>
@@ -38,7 +38,7 @@
 
     <LinearLayout
             android:id="@+id/AppSelectLayout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:tag="AppSelect"
@@ -53,7 +53,7 @@
 
         <TextView
                 android:id="@+id/textViewAppSelectDetail"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/select_app_detail"
                 android:textAppearance="?android:attr/textAppearanceSmall"/>
