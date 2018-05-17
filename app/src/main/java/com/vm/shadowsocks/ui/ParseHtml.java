@@ -78,7 +78,7 @@ public class ParseHtml {
         }
 
         {//Port
-            Pattern r = Pattern.compile("(Port).{1,50}");
+            Pattern r = Pattern.compile("(Port:<span).+");
 
             Matcher m = r.matcher(mainkey);
 
@@ -96,7 +96,7 @@ public class ParseHtml {
         }
 
         {//Password
-            Pattern r = Pattern.compile("(Password:).{1,50}");
+            Pattern r = Pattern.compile("(Password:<span).+");
 
             Matcher m = r.matcher(mainkey);
 

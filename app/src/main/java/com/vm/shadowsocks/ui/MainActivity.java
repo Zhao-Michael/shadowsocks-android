@@ -3,7 +3,6 @@ package com.vm.shadowsocks.ui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -12,14 +11,12 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.GetChars;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.vm.shadowsocks.R;
@@ -50,6 +47,8 @@ public class MainActivity extends Activity implements
 
     private static final int START_VPN_SERVICE_REQUEST_CODE = 1985;
 
+    private static final String mBaseUrl = "https://my.ishadowx.net/";
+
     private Switch switchProxy;
     private TextView textViewLog;
     private ScrollView scrollViewLog;
@@ -60,6 +59,7 @@ public class MainActivity extends Activity implements
 
     private static List<String> listServer = new LinkedList<>();
 
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,7 +167,7 @@ public class MainActivity extends Activity implements
                                 case 1:
                                     showProxyUrlInputDialog();
                                     break;
-                                case 2:{
+                                case 2: {
                                     ShowGetServerDialog();
                                     break;
                                 }
@@ -273,8 +273,8 @@ public class MainActivity extends Activity implements
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (LocalVpnService.IsRunning != isChecked) {
-           if(!switchProxy.getText().toString().contains(getString(R.string.config_not_set_value)))
-               switchProxy.setEnabled(false);
+            if (!switchProxy.getText().toString().contains(getString(R.string.config_not_set_value)))
+                switchProxy.setEnabled(false);
             if (isChecked) {
                 Intent intent = LocalVpnService.prepare(this);
                 if (intent == null) {
@@ -429,7 +429,7 @@ public class MainActivity extends Activity implements
                 @Override
                 public void run() {
 
-                    String str = DownLoadFromUrl("https://global.ishadowx.net/");
+                    String str = DownLoadFromUrl(mBaseUrl);
 
                     if (str == null) {
                         onLogReceived("DownLoadFromUrl: return null");
