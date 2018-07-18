@@ -20,7 +20,7 @@
     <string name="btn_more">More&#8230;</string>
     <string name="vpn_connected_status">connected</string>
     <string name="vpn_disconnected_status">disconnected</string>
-    <string name="about_info">Modified by Zhaochen\r\nDeveloped By dawei\r\nSupport Android 4.0+ \r\nBase On SmartProxy
+    <string name="about_info">Modified by venerealulcer\r\nDeveloped By dawei\r\nSupport Android 4.0+ \r\nBase On SmartProxy
         and Shadowsocks-Java
     </string>
     <string name="exit_confirm_info">This will disconnect the VPN connection, Are you sure to exit?</string>
