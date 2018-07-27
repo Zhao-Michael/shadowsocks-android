@@ -192,35 +192,32 @@ public class LocalVpnService extends VpnService implements Runnable {
             m_DnsProxy.start();
             writeLog("LocalDnsProxy started.");
 
-            while (true) {
-                if (IsRunning) {
-                    //加载配置文件
+            while (true) if (IsRunning) {
+                //加载配置文件
 
-                    writeLog("set shadowsocks/(http proxy)");
-                    try {
-                        ProxyConfig.Instance.m_ProxyList.clear();
-                        ProxyConfig.Instance.addProxyToList(ProxyUrl);
-                        writeLog("Proxy is: %s", ProxyConfig.Instance.getDefaultProxy());
-                    } catch (Exception e) {
-                        ;
-                        String errString = e.getMessage();
-                        if (errString == null || errString.isEmpty()) {
-                            errString = e.toString();
-                        }
-                        IsRunning = false;
-                        onStatusChanged(errString, false);
-                        continue;
+                writeLog("set shadowsocks/(http proxy)");
+                try {
+                    ProxyConfig.Instance.m_ProxyList.clear();
+                    ProxyConfig.Instance.addProxyToList(ProxyUrl);
+                    writeLog("Proxy is: %s", ProxyConfig.Instance.getDefaultProxy());
+                } catch (Exception e) {
+                    String errString = e.getMessage();
+                    if (errString == null || errString.isEmpty()) {
+                        errString = e.toString();
                     }
-                    String welcomeInfoString = ProxyConfig.Instance.getWelcomeInfo();
-                    if (welcomeInfoString != null && !welcomeInfoString.isEmpty()) {
-                        writeLog("%s", ProxyConfig.Instance.getWelcomeInfo());
-                    }
-                    writeLog("Global mode is " + (ProxyConfig.Instance.globalMode ? "on" : "off"));
-
-                    runVPN();
-                } else {
-                    Thread.sleep(100);
+                    IsRunning = false;
+                    onStatusChanged(errString, false);
+                    continue;
                 }
+                String welcomeInfoString = ProxyConfig.Instance.getWelcomeInfo();
+                if (welcomeInfoString != null && !welcomeInfoString.isEmpty()) {
+                    writeLog("%s", ProxyConfig.Instance.getWelcomeInfo());
+                }
+                writeLog("Global mode is " + (ProxyConfig.Instance.globalMode ? "on" : "off"));
+
+                runVPN();
+            } else {
+                Thread.sleep(100);
             }
         } catch (InterruptedException e) {
             System.out.println(e);

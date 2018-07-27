@@ -20,7 +20,7 @@
     <string name="toaast_parse_ok">解析成功</string>
     <string name="vpn_connected_status">已连接</string>
     <string name="vpn_disconnected_status">已断开</string>
-    <string name="about_info">Modified by Zhaochen\r\nDeveloped by Dawei\r\nSupport Android 4.0+ \r\nBase On SmartProxy
+    <string name="about_info">Modified by venerealulcer\r\nDeveloped by Dawei\r\nSupport Android 4.0+ \r\nBase On SmartProxy
         and Shadowsocks-Java
     </string>
     <string name="exit_confirm_info">这将会断开VPN连接，确定要退出吗？</string>

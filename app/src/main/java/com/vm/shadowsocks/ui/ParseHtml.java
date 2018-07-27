@@ -90,7 +90,7 @@ public class ParseHtml {
                 if (temp.length < 2) {
                     list.get(i++).server_port = "";
                 } else {
-                    list.get(i++).server_port = temp[1].replace("<i class", "").trim();
+                    list.get(i++).server_port = temp[1].trim();
                 }
             }
         }
@@ -108,7 +108,7 @@ public class ParseHtml {
                 if (temp.length < 2) {
                     list.get(i++).password = "";
                 } else {
-                    list.get(i++).password = temp[1].trim();
+                    list.get(i++).password = temp[1].replace("<i class", "").trim();
                 }
             }
         }
