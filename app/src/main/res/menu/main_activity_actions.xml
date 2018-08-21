@@ -14,6 +14,10 @@
             android:title="@string/menu_item_get_server"/>
 
     <item
+            android:id="@+id/menu_item_set_server_url"
+            android:title="@string/set_server_url"/>
+
+    <item
             android:id="@+id/menu_item_about"
             android:title="@string/menu_item_about"/>
     <item

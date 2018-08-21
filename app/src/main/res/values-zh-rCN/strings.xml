@@ -14,6 +14,7 @@
     <string name="select_app">选择使用代理的软件</string>
     <string name="select_app_detail">未选择</string>
     <string name="proxied_apps">使用代理的软件</string>
+    <string name="set_server_url">设置服务器地址</string>
     <string name="btn_ok">确定</string>
     <string name="btn_cancel">取消</string>
     <string name="btn_more">查看源码</string>

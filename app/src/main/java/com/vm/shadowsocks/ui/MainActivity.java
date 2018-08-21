@@ -11,6 +11,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -47,7 +48,7 @@ public class MainActivity extends Activity implements
 
     private static final int START_VPN_SERVICE_REQUEST_CODE = 1985;
 
-    private static final String mBaseUrl = "https://my.ishadowx.net/";
+    private static String mBaseUrl = "";
 
     private Switch switchProxy;
     private TextView textViewLog;
@@ -93,8 +94,23 @@ public class MainActivity extends Activity implements
             ((ViewGroup) findViewById(R.id.textViewAppSelectLine).getParent()).removeView(findViewById(R.id.textViewAppSelectLine));
         }
 
+        readUrlPreference();
+
         onLogReceived("Shadowsock App Start...");
 
+    }
+
+    void readUrlPreference() {
+        SharedPreferences preferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
+        mBaseUrl = preferences.getString("BaseUrl", null);
+    }
+
+    void saveUrlPreference() {
+        SharedPreferences preferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("BaseUrl", mBaseUrl);
+        editor.apply();
+        onLogReceived("Set Url Source OK: " + mBaseUrl);
     }
 
     String readProxyUrl() {
@@ -176,7 +192,6 @@ public class MainActivity extends Activity implements
                     })
                     .show();
         } else if (v.getTag().toString().equals("AppSelect")) {
-            System.out.println("abc");
             startActivity(new Intent(this, AppManager.class));
         }
     }
@@ -185,6 +200,26 @@ public class MainActivity extends Activity implements
         new IntentIntegrator(this)
                 .setPrompt(getString(R.string.config_url_scan_hint))
                 .initiateScan(IntentIntegrator.QR_CODE_TYPES);
+    }
+
+    private void ShowSetBaseUrlDialog() {
+        final EditText editText = new EditText(this);
+        editText.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
+        editText.setText(mBaseUrl);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.config_url)
+                .setView(editText)
+                .setPositiveButton(R.string.btn_ok, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (editText.getText() == null) {
+                            return;
+                        }
+                        mBaseUrl = editText.getText().toString();
+                        saveUrlPreference();
+                    }
+                }).setNegativeButton(R.string.btn_cancel, null)
+                .show();
     }
 
     private void showProxyUrlInputDialog() {
@@ -384,6 +419,17 @@ public class MainActivity extends Activity implements
             case R.id.menu_item_exit:
                 if (!LocalVpnService.IsRunning) {
                     finish();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            System.exit(0);
+                        }
+                    }).start();
                     return true;
                 }
 
@@ -415,6 +461,9 @@ public class MainActivity extends Activity implements
             case R.id.menu_item_get_server:
                 ShowGetServerDialog();
                 break;
+            case R.id.menu_item_set_server_url:
+                ShowSetBaseUrlDialog();
+                break;
             default:
                 break;
         }
@@ -428,6 +477,9 @@ public class MainActivity extends Activity implements
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
+
+                    if (mBaseUrl == null || mBaseUrl.isEmpty())
+                        onLogReceived("mBaseUrl is empty !");
 
                     String str = DownLoadFromUrl(mBaseUrl);
 
@@ -460,15 +512,19 @@ public class MainActivity extends Activity implements
             ProgressBar progressBar = new ProgressBar(this);
             progressBar.setPadding(10, 60, 10, 30);
             pgd.setView(progressBar);
-            pgd.setButton(DialogInterface.BUTTON_POSITIVE, this.getText(R.string.btn_cancel), new OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    try {
-                        thread.stop();
-                    } catch (Exception ignored) {
-                    }
-                }
-            });
+            pgd.setButton(DialogInterface.BUTTON_POSITIVE, this.
+
+                    getText(R.string.btn_cancel), new
+
+                    OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                thread.stop();
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    });
             pgd.show();
 
         } else {
