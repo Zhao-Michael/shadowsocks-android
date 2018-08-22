@@ -11,7 +11,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -66,12 +65,12 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        scrollViewLog = (ScrollView) findViewById(R.id.scrollViewLog);
-        textViewLog = (TextView) findViewById(R.id.textViewLog);
+        scrollViewLog = findViewById(R.id.scrollViewLog);
+        textViewLog = findViewById(R.id.textViewLog);
         findViewById(R.id.ProxyUrlLayout).setOnClickListener(this);
         findViewById(R.id.AppSelectLayout).setOnClickListener(this);
 
-        textViewProxyUrl = (TextView) findViewById(R.id.textViewProxyUrl);
+        textViewProxyUrl = findViewById(R.id.textViewProxyUrl);
         String ProxyUrl = readProxyUrl();
         if (TextUtils.isEmpty(ProxyUrl)) {
             textViewProxyUrl.setText(R.string.config_not_set_value);
@@ -88,7 +87,7 @@ public class MainActivity extends Activity implements
         //Pre-App Proxy
         if (AppProxyManager.isLollipopOrAbove) {
             new AppProxyManager(this);
-            textViewProxyApp = (TextView) findViewById(R.id.textViewAppSelectDetail);
+            textViewProxyApp = findViewById(R.id.textViewAppSelectDetail);
         } else {
             ((ViewGroup) findViewById(R.id.AppSelectLayout).getParent()).removeView(findViewById(R.id.AppSelectLayout));
             ((ViewGroup) findViewById(R.id.textViewAppSelectLine).getParent()).removeView(findViewById(R.id.textViewAppSelectLine));
@@ -103,6 +102,12 @@ public class MainActivity extends Activity implements
     void readUrlPreference() {
         SharedPreferences preferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
         mBaseUrl = preferences.getString("BaseUrl", null);
+
+        if (mBaseUrl == null && mBaseUrl.isEmpty()) {
+            onLogReceived("mBaseUrl : null");
+        } else {
+            onLogReceived("mBaseUrl : " + mBaseUrl);
+        }
     }
 
     void saveUrlPreference() {
